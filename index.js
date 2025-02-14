@@ -1,30 +1,29 @@
 const express = require('express');
-const http = require('http'); // For Socket.io
+const http = require('http');
 const { Server } = require("socket.io");
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const authRoutes = require('./routes/authRoutes'); // Import your auth routes
-const messageRoutes = require('./routes/messageRoutes'); // Import your message routes
-const Message = require('./models/Message'); // Import your Message model
-const User = require('./models/User'); // Import your User model
-const cors = require('cors');
+const cors = require('cors'); // Import cors
 
-dotenv.config(); // Load environment variables
+const authRoutes = require('./routes/authRoutes');
+const messageRoutes = require('./routes/messageRoutes');
+const Message = require('./models/Message'); // Import Message model
+
+dotenv.config();
 
 const app = express();
-const server = http.createServer(app); // Create HTTP server for Socket.io
+const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:3000", // or your deployed frontend URL
+        origin: process.env.CLIENT_URL || "http://localhost:3000", // Be explicit, or use an env variable
         methods: ["GET", "POST"]
     }
-}); // Initialize Socket.io
-
+});
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors()); // Enable Cross-Origin Resource Sharing
-app.use(express.json()); // Enable parsing JSON request bodies
+app.use(cors()); // Use cors middleware *before* other routes
+app.use(express.json());
 
 // Database connection
 mongoose.connect(process.env.MONGODB_URI, {
@@ -34,31 +33,37 @@ mongoose.connect(process.env.MONGODB_URI, {
 .catch(err => console.error("MongoDB connection error:", err));
 
 // Routes
-app.use('/api', authRoutes); // Use your auth routes for /api/register, /api/login
-app.use('/api', messageRoutes); // Use your message routes for /api/messages, etc.
+app.use('/api', authRoutes);
+app.use('/api', messageRoutes);
+
 
 // Socket.io logic
 io.on('connection', (socket) => {
     console.log('A user connected');
 
     socket.on('join_room', (room) => {
-        socket.join(room); // Join the socket to the room
+        socket.join(room);
     });
 
     socket.on('send_message', async (message) => {
         try {
-            // 1. Emit the message to all clients in the room
-            io.to(message.room).emit('message', message);
-
-            // 2. Save the message to the database (if needed)
+            // 1. Save the message to the database (important for persistence)
             const newMessage = new Message(message);
-            await newMessage.save();
+            const savedMessage = await newMessage.save();
+
+            // 2. Populate sender info *before* emitting
+            const populatedMessage = await Message.findById(savedMessage._id).populate('sender', 'username');
+
+            // 3. Emit the populated message
+            io.to(message.room).emit('message', populatedMessage);
+
 
         } catch (error) {
-            console.error("Error saving message:", error);
+            console.error("Error saving/sending message:", error);
+            // Handle error appropriately (e.g., emit an error event to the client)
+            socket.emit('message_error', 'Failed to send message.'); // Example error event
         }
     });
-
 
     socket.on('disconnect', () => {
         console.log('User disconnected');
