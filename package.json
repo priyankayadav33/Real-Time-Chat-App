@@ -2,32 +2,32 @@
   "name": "realtime-chat-app",
   "version": "1.0.0",
   "description": "A real-time chat application",
-  "main": "server/index.js", // Entry point for the backend
+  "main": "server/index.js",
   "scripts": {
-    "start": "node server/index.js", // Start the backend
-    "dev": "concurrently \"npm run start --prefix server\" \"npm start --prefix client\"", // Start both client and server concurrently
-    "build": "npm run build --prefix client", // Build the React app
+    "start": "node server/index.js",
+    "dev": "concurrently \"npm run start --prefix server\" \"npm start --prefix client\"",
+    "build": "npm run build --prefix client",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "Your Name",
   "license": "ISC",
   "devDependencies": {
-    "concurrently": "^8.2.1" // For running client and server together
+    "concurrently": "^8.2.1"
   },
   "dependencies": {
-    "axios": "^1.5.0", // For making HTTP requests (client)
-    "bcrypt": "^5.1.1", // For password hashing (server)
-    "cors": "^6.1.1", // Enable Cross-Origin Resource Sharing
-    "dotenv": "^16.3.1", // For environment variables (server)
-    "express": "^4.18.2", // Web framework (server)
-    "jsonwebtoken": "^9.0.0", // For JWT authentication (server)
-    "mongoose": "^7.5.0", // MongoDB ODM (server)
-    "react": "^18.2.0", // React library (client)
-    "react-dom": "^18.2.0", // React DOM (client)
-    "react-router-dom": "^6.15.0", // React Router (client)
-    "react-scripts": "5.0.1", // Scripts for React (client)
-    "socket.io": "^4.7.2", // For real-time communication (server)
-    "socket.io-client": "^4.7.2" // For real-time communication (client)
+    "axios": "^1.5.0",
+    "bcrypt": "^5.1.1",
+    "cors": "^6.1.1",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^7.5.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.15.0",
+    "react-scripts": "5.0.1",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2"
   }
 }
